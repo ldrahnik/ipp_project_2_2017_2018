@@ -327,7 +327,9 @@ class csv2xml:
                 self.error("parameter help nelze kombinovat s žádným dalším parametrem", 1)
 
         # --input=filename
-        if args.input != None and args.input != sys.stdin:
+        if args.input == None:
+            args.input = sys.stdin
+        else:
             try:
                 args.input = open(args.input, mode='r', newline='', encoding='utf-8')
             except IOError:
@@ -335,7 +337,9 @@ class csv2xml:
         args.input = args.input.readlines()
 
         # --output=filename
-        if args.output != None and args.output != sys.stdout:
+        if args.output == None:
+            args.output = sys.stdout
+        else:
             try:
                 args.output = open(args.output, mode='w', newline='', encoding='utf-8')
             except IOError:
@@ -351,7 +355,7 @@ class csv2xml:
             self.error("separátor nastavovaný skrze parameter -s musí být pouze jeden znak", 1)
 
         # -c=column-element
-        if args.line_element != None:
+        if args.column_element != None:
             if (self.isValidXmlTagName(args.column_element)) == False:
                 self.error("nevalidní xml column element předaný parametrem -c: <"+args.column_element, 30)
 
@@ -363,16 +367,11 @@ class csv2xml:
         # -i
         if args.i == True and args.line_element == None:
             self.error("-i parameter se musí kombinovat s parametrem -l", 1)
-        if args.i == True:
-            try:
-                index = int(args.i)
-            except ValueError:
-                self.error("-i parameter musí být číselná hodnota", 1)
 
         # --start=n
         if args.start != None:
             if args.start < 0:
-                self.error("hodnota parametru --start=n musí být >= 0")
+                self.error("hodnota parametru --start=n musí být >= 0", 1)
             if args.i == None or args.line_element == None:
                 self.error("parameter --start se musí kombinovat s parametrem -i a -l", 1)
 
@@ -394,7 +393,7 @@ class csv2xml:
                 self.error("parameter --missing-field je povolen pouze v kombinaci s --error-recovery, -e", 1);
 
         # --all-columns
-        if args.missing_field != None:
+        if args.all_collumns != None:
             if args.e == None:
                 self.error("parameter --all-columns je povolen pouze v kombinaci s --error-recovery, -e", 1);
 
@@ -402,14 +401,6 @@ class csv2xml:
 
     # donastavování argumentů
     def setUpCmdArgs(self, args):
-
-        # --input=filename
-        if args.input == None:
-            args.input = sys.stdin
-
-        # --output=filename
-        if args.output == None:
-            args.output = sys.stdout
 
         # -s=separator
         if args.separator == None:
@@ -433,10 +424,6 @@ class csv2xml:
         if args.e == True:
             if args.missing_field == None:
                 args.missing_field = ''
-
-        # --missing-field=val
-        if args.missing_field != None:
-            args.missing_field = self.convertMetacharacters(args.missing_field)
 
         return args
 
@@ -472,11 +459,11 @@ class csv2xml:
         # parsování argumentů
         result = args.parse_args()
 
-        # donastavování argumentů
-        result = self.setUpCmdArgs(result)
-
         # validování argumentů
         self.validateCmdArgs(result)
+
+        # donastavování argumentů
+        result = self.setUpCmdArgs(result)
 
         # --help
         if result.help == True:
