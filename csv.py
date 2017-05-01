@@ -21,7 +21,7 @@ class csv2xml:
 
     # spočítá řádky, sloupce, zarovnání pro řádky, sloupce
     def getBaseInfoFromCsvFile(self, opts, separator, all_collumns):
-        rowCount = 0
+        rowCount = opts.start
         columnsCount = 0
 
         rowPadding = []
@@ -39,7 +39,7 @@ class csv2xml:
                     if all_collumns == True:
                         columnsPadding.append(self.nCharPaddingRequired(max(len(row), columnsCount)))
                     else:
-                        columnsPadding.append(self.nCharPaddingRequired(min(len(row), columnsCount)))
+                        columnsPadding.append(self.nCharPaddingRequired(columnsCount))
 
                 rowPadding = self.nCharPaddingRequired(rowCount)
         except csv_sys.Error:
@@ -257,7 +257,7 @@ class csv2xml:
         for row in inputCsv:
 
             # obalující element řádku (začátek)
-            outputXml += self.getRowStartElement(ic, opts.line_element, opts.i, opts.start, rowPadding)
+            outputXml += self.getRowStartElement(ic, opts.line_element, opts.i, opts.start, rowPadding, opts.padding)
 
             # počítadlo sloupců
             cc = 1
@@ -270,9 +270,9 @@ class csv2xml:
                         if opts.padding == False:
                             col_name = colNames[cc-1]
                         else:
-                            col_name = self.getColumnName(opts.column_element, cc, columnsPadding[rc])
+                            col_name = self.getColumnName(opts.column_element, cc, columnsPadding[rc], opts.padding)
                     elif opts.all_collumns == True:
-                        col_name = self.getColumnName(opts.column_element, cc, columnsPadding[rc])
+                        col_name = self.getColumnName(opts.column_element, cc, columnsPadding[rc], opts.padding)
 
                     # přidáme sloupec
                     outputXml += self.getColumnElement(opts, ic, col_name, col)
@@ -284,7 +284,7 @@ class csv2xml:
                     if cc <= columnsCount:
                         insert_column = colNames[x-1]
                     else:
-                        insert_column = self.getColumnName(opts.column_element, x, pad_cols[rc])
+                        insert_column = self.getColumnName(opts.column_element, x, columnsPadding[rc], opts.padding)
 
                     # přidáme sloupec
                     outputXml += self.getColumnElement(opts, ic, insert_column, opts.missing_field)
@@ -473,10 +473,10 @@ class csv2xml:
         return result
 
     # vrátí počáteční element řádku
-    def getRowStartElement(self, ic, name, i, n, padLines):
+    def getRowStartElement(self, ic, name, i, n, padLines, padding):
         index = '';
         if i == True:
-            index = ' index="{:s}"'.format(self.padNumber(n, padLines))
+            index = ' index="{:s}"'.format(self.padNumber(n, padLines, padding))
 
         return '{:s}<{:s}{:s}>\n'.format(
             self.indent(ic),
@@ -501,8 +501,8 @@ class csv2xml:
         return '{:s}<{:s}>\n'.format(self.indent(ic), name)
 
     # vrátí název sloupce (přidá prefix pokud nějaký je)
-    def getColumnName(self, prefix, number, paddingTo):
-        return '{:s}{:s}'.format(prefix, self.padNumber(number, paddingTo));
+    def getColumnName(self, prefix, number, paddingTo, padding):
+        return '{:s}{:s}'.format(prefix, self.padNumber(number, paddingTo, padding));
 
     # vrátí koncový element sloupce
     def getColumnEndElement(self, ic, name):
@@ -517,10 +517,10 @@ class csv2xml:
     def indent(self, n):
         return '    ' * n
 
-    def padNumber(self, number, padddingTo = 0, padding = False):
+    def padNumber(self, number, paddingTo = 0, padding = False):
         result = '{:d}'.format(number)
         if padding == True:
-            result = s.zfill(padddingTo)
+            result = result.zfill(paddingTo)
         return result
 
     def nCharPaddingRequired(self, number):
