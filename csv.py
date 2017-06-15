@@ -80,41 +80,48 @@ class csv2xml:
         # input jako jeden dlouhý string (kvůli podpoře multiline, tzn. přistupování k začátku a konci položky na jiném řádku)
         tmpInputLikeString = ''.join(tmpInput)
 
-        while index < len(tmpInputLikeString):
-            char = tmpInputLikeString[index]
+        # prázdné CSV => 1 buňka (RFC: Within the header and each record, there may be one or more fields, separated by commas.)
+        isEmpty = False
+        if len(tmpInputLikeString) == 0 and opts.validate == True:
+            isEmpty = True
+            lineColumns.append("")
+            lines.append(lineColumns)
+        else:
+           while index < len(tmpInputLikeString):
+               char = tmpInputLikeString[index]
 
-            # asci hodnota aktuálního znaku
-            asciiValue = ord(char)
+               # asci hodnota aktuálního znaku
+               asciiValue = ord(char)
 
-            if char == '"' and isEscapedField == False:
-                if index != 0 and tmpInputLikeString[index - 1] != opts.separator and opts.validate == True:
-                    self.error("Pokud buňka (anglicky field ) obsahuje ouvozovkovaný řetězec, tak nesmí obsahovat žádné znaky mezi separátory a ohraničujícími uvozovkami", 39)
-                isEscapedField = True
-            elif char == '"' and (len(tmpInputLikeString) == index + 1 or tmpInputLikeString[index + 1] == opts.separator or tmpInputLikeString[index + 1] == '\r') and isEscapedField == True and dQuoteUsed == False:
-                isEscapedField = False
-                if len(tmpInputLikeString) != index + 1 and tmpInputLikeString[index + 1] != opts.separator and tmpInputLikeString[index + 1] != '\r' and opts.validate == True:
-                    self.error("Pokud buňka (anglicky field ) obsahuje ouvozovkovaný řetězec, tak nesmí obsahovat žádné znaky mezi separátory a ohraničujícími uvozovkami", 39)
-            elif char == opts.separator and isEscapedField == False:
-                lineColumns.append(tmpInputLikeString[lastFieldEndIndex:index])
-                lastFieldEndIndex = index + 1
-            elif char == "\r" and isEscapedField == False:
-                crUsed = True
-            elif char == "\n" and isEscapedField == False:
-                if crUsed == False:
-                    self.error("řádky se musí oddělovat pomocí CRLF, znak \\r\\n", 4)
-                crUsed = False
+               if char == '"' and isEscapedField == False:
+                   if index != 0 and tmpInputLikeString[index - 1] != opts.separator and opts.validate == True:
+                       self.error("Pokud buňka (anglicky field ) obsahuje ouvozovkovaný řetězec, tak nesmí obsahovat žádné znaky mezi separátory a ohraničujícími uvozovkami", 39)
+                   isEscapedField = True
+               elif char == '"' and (len(tmpInputLikeString) == index + 1 or tmpInputLikeString[index + 1] == opts.separator or tmpInputLikeString[index + 1] == '\r') and isEscapedField == True and dQuoteUsed == False:
+                   isEscapedField = False
+                   if len(tmpInputLikeString) != index + 1 and tmpInputLikeString[index + 1] != opts.separator and tmpInputLikeString[index + 1] != '\r' and opts.validate == True:
+                       self.error("Pokud buňka (anglicky field ) obsahuje ouvozovkovaný řetězec, tak nesmí obsahovat žádné znaky mezi separátory a ohraničujícími uvozovkami", 39)
+               elif char == opts.separator and isEscapedField == False:
+                   lineColumns.append(tmpInputLikeString[lastFieldEndIndex:index])
+                   lastFieldEndIndex = index + 1
+               elif char == "\r" and isEscapedField == False:
+                   crUsed = True
+               elif char == "\n" and isEscapedField == False:
+                   if crUsed == False:
+                       self.error("řádky se musí oddělovat pomocí CRLF, znak \\r\\n", 4)
+                   crUsed = False
 
-                # přidání sloupce
-                lineColumns.append(tmpInputLikeString[lastFieldEndIndex:index - 1])
-                lastFieldEndIndex = index + 1
+                   # přidání sloupce
+                   lineColumns.append(tmpInputLikeString[lastFieldEndIndex:index - 1])
+                   lastFieldEndIndex = index + 1
 
-                # vytvoření záznamu řádku s danými sloupci
-                lines.append(lineColumns)
-                lineColumns = []
-            else:
-                dQuoteUsed = self.validateFieldBlock(opts, char, asciiValue, isEscapedField, dQuoteUsed)
+                   # vytvoření záznamu řádku s danými sloupci
+                   lines.append(lineColumns)
+                   lineColumns = []
+               else:
+                   dQuoteUsed = self.validateFieldBlock(opts, char, asciiValue, isEscapedField, dQuoteUsed)
 
-            index += 1
+               index += 1
 
         # kontrola hraničních dvojitých uvozovek
         if isEscapedField == True:
@@ -157,7 +164,7 @@ class csv2xml:
         # uklizení
         del tmpInput
 
-        return
+        return isEmpty
 
     # RFC4180: field = (escaped / non-escaped)
     def validateFieldBlock(self, opts, char, asciiValue, isEscapedField, dQuoteUsed):
@@ -180,7 +187,7 @@ class csv2xml:
     # Pro účely této úlohy je ještě nutné rozšířit definici neterminálu TEXTDATA z RFC 4180, aby
     # akceptovala i UTF-8 znaky s kódem větším jak 127.
     def validateTextDataBlock(self, asciiValue):
-        if not (asciiValue == 20) and not (asciiValue == 21) and not (asciiValue > 22 and asciiValue < 44) and not (asciiValue > 44 and asciiValue < 127) and not (asciiValue > 127):
+        if not (asciiValue == 20) and not (asciiValue == 21) and not (asciiValue > 22 and asciiValue < 44) and not (asciiValue > 44 and asciiValue < 177) and not (asciiValue > 127):
             return False
         return True
 
@@ -207,18 +214,35 @@ class csv2xml:
 
     # provede konverzi z CSV do XML
     def runConversionFromCsv2Xml(self, opts):
+        # výstupní xml
+        outputXml = ''
 
         # přednačte soubor kvůli obecným informacím
         linesCount, columnsCount, rowPadding, columnsPadding = self.getBaseInfoFromCsvFile(opts, opts.separator, opts.all_collumns)
 
         # zvaliduje CSV soubor
-        self.validateCsvFile(opts)
+        isEmpty = self.validateCsvFile(opts)
+
+        # prázdné CSV => 1 buňka
+        if isEmpty == True:
+            outputXml += '<?xml version="1.0" encoding="UTF-8"?>\n'
+
+            # obalující element řádku (začátek)
+            outputXml += self.getRowStartElement(0, opts.line_element, opts.i, opts.start, rowPadding, opts.padding)
+
+            # přidáme sloupec
+            outputXml += self.getColumnElement(opts, 0, 'col1', "")
+
+            # obalující element řádku (konec)
+            outputXml += self.getRowEndElement(0, opts.line_element)
+
+            # zápis výsledného XML
+            print(outputXml, end='', file=opts.output)
+
+            return 0
 
         # načteme soubor pomocí knihovny csv
         inputCsv = csv_sys.reader(opts.input, delimiter=opts.separator, quotechar='"')
-
-        # výstupní xml
-        outputXml = ''
 
         # ic = počítadlo odsazení
         ic = 0
