@@ -272,7 +272,7 @@ class csv2xml:
 
         # kontrola názvu sloupců
         for name in colNames:
-            if self.isValidXmlTagValue(name) != None:
+            if self.isValidXmlTag(name) == False:
                 self.error("nevalidní název sloupce: <"+name, 31)
 
         # počítadlo řádků
@@ -371,7 +371,7 @@ class csv2xml:
 
         # -r=root-element
         if args.root_element != None:
-            if (self.isValidXmlTagName(args.root_element)) == False:
+            if (self.isValidXmlTag(args.root_element)) == False:
                 self.error("nevalidní xml root element předaný parametrem -r: <"+args.root_element, 30)
 
         # -s=separator
@@ -380,13 +380,19 @@ class csv2xml:
 
         # -c=column-element
         if args.column_element != None:
-            if (self.isValidXmlTagName(args.column_element)) == False:
-                self.error("nevalidní xml column element předaný parametrem -c: <"+args.column_element, 30)
+            columnElementWithIndex = args.column_element + "1";
+            if (self.isValidXmlTag(columnElementWithIndex)) == False:
+                self.error("nevalidní xml column element předaný parametrem -c: <"+columnElementWithIndex, 30)
 
         # -l=line-element
         if args.line_element != None:
-            if (self.isValidXmlTagName(args.line_element)) == False:
-                self.error("nevalidní xml line element předaný parametrem -l: <"+args.line_element, 30)
+            if args.i == True:
+                lineElementWithIndex = args.line_element + "0";
+                if (self.isValidXmlTag(lineElementWithIndex)) == False:
+                    self.error("nevalidní xml line element předaný parametrem -l: <"+lineElementWithIndex, 30)
+            else:
+                if (self.isValidXmlTag(args.line_element)) == False:
+                    self.error("nevalidní xml line element předaný parametrem -l: <"+args.line_element, 30)
 
         # -i
         if args.i == True and args.line_element == None:
@@ -564,16 +570,34 @@ class csv2xml:
         return string
 
     # zkontroluje validnost názvu XML elementu
-    def isValidXmlTagName(self, string):
-        if  None != re.match('^[^\w:_].*$', string)  or \
-            None != re.match('^[0-9].*$', string)    or \
-            None != re.match('[^\w:_\.\-]', string)  :
-                return False
-        return
+    # https://www.w3.org/TR/REC-xml/#NT-NameChar
+    def isValidXmlTag(self, string):
+        # Names beginning with the string "xml", or with any string which would match (('X'|'x') ('M'|'m') ('L'|'l')), are reserved for standardization in this or future versions of this specification.
+        if string.startswith('xml') or string.startswith('xmL') or string.startswith('xMl') or string.startswith('xML') or string.startswith('Xml') or string.startswith('XmL') or string.startswith('XMl') or string.startswith('XML'):
+            return False
 
-    # zkontroluje validnost obsahu XML elementu
-    def isValidXmlTagValue(self, value):
-        return re.match('[^\w:_.].*$', value)
+        # The first character of a Name must be a NameStartChar
+        if len(string) > 0 and self.isValidXmlTagStartName(string[0]) == False:
+            return False
+
+        # and any other characters must be NameChars;
+        if len(string) > 1 and self.isValidXmlTagName(string[1:]) == False:
+            return False
+
+    # 	":" | [A-Z] | "_" | [a-z] | [#xC0-#xD6] | [#xD8-#xF6] | [#xF8-#x2FF] | [#x370-#x37D] | [#x37F-#x1FFF] | [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] | [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD] | [#x10000-#xEFFFF
+    def isValidXmlTagStartName(self, char):
+        asciiValue = ord(char)
+        if asciiValue == 58 or (asciiValue > 64  and asciiValue < 91) or asciiValue == 95 or (asciiValue > 96 and asciiValue < 123) or (asciiValue > 192 and asciiValue < 215) or (asciiValue > 215 and asciiValue < 247) or (asciiValue > 247 and asciiValue < 767) or (asciiValue > 879 and asciiValue < 894) or (asciiValue > 894 and asciiValue < 8192) or (asciiValue > 8203 and asciiValue < 8206) or (asciiValue > 8304 and asciiValue < 8592) or (asciiValue > 11263 and asciiValue < 12272) or (asciiValue > 12288 and asciiValue < 55296) or (asciiValue > 63743 and asciiValue < 64976) or (asciiValue > 65007 and asciiValue > 65534) or (asciiValue > 65535 and asciiValue < 983040):
+            return True
+        return False
+
+    # NameStartChar | "-" | "." | [0-9] | #xB7 | [#x0300-#x036F] | [#x203F-#x2040]
+    def isValidXmlTagName(self, string):
+        for char in string:
+            asciiValue = ord(char)
+            if not (asciiValue == 45 or asciiValue == 46 or (asciiValue > 47 and asciiValue < 58) or asciiValue == 183 or (asciiValue > 767 and asciiValue < 880) or (asciiValue > 8254 and asciiValue < 8257)) and not self.isValidXmlTagStartName(char):
+                return False
+        return True
 
     # vypíše error message na standartní chybový výstup a ukončí program se specifikovaným kódem
     def error(self, message, code = -1):
