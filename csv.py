@@ -128,7 +128,7 @@ class csv2xml:
             self.error('neukončené dvojité uvozovky položky', 4)
 
         # kontrola dvojitých uvozovek uvnitř
-        if dQuoteUsed == True and opts.validate:
+        if dQuoteUsed == True and opts.validate == True:
             self.error('chybně použité dvojité uvozovky uvnitř hraničním dvojitých uvozovek', 39)
 
         # kontrola konce řádku
@@ -142,7 +142,7 @@ class csv2xml:
         lines.append(lineColumns)
 
         # kontrola konce posledního řádku
-        if char == '\r' or char == '\n':
+        if (char == '\r' or char == '\n') and opts.validate == False:
             self.error('poslední řádek nesmí končit oddělovačem řádku', 4)
 
         # kontrola počtu sloupců
