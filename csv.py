@@ -180,7 +180,7 @@ class csv2xml:
     # Pro účely této úlohy je ještě nutné rozšířit definici neterminálu TEXTDATA z RFC 4180, aby
     # akceptovala i UTF-8 znaky s kódem větším jak 127.
     def validateTextDataBlock(self, asciiValue):
-        if not (asciiValue == 20) and not (asciiValue == 21) and not (asciiValue > 22 and asciiValue < 44) and not (asciiValue > 44 and asciiValue < 177) and not (asciiValue > 127):
+        if not (asciiValue == 20) and not (asciiValue == 21) and not (asciiValue > 22 and asciiValue < 44) and not (asciiValue > 44 and asciiValue < 127) and not (asciiValue > 127):
             return False
         return True
 
