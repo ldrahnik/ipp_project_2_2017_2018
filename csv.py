@@ -248,7 +248,7 @@ class csv2xml:
         ic = 0
 
         # xml hlavička
-        if opts.n == False:
+        if not opts.n:
             outputXml += '<?xml version="1.0" encoding="UTF-8"?>\n'
 
         # obalující root element (začátek)
@@ -346,7 +346,7 @@ class csv2xml:
     # validování argumentů
     def validateCmdArgs(self, args):
         # --help
-        if args.help == True:
+        if args.help:
             if len(sys.argv) != 2:
                 self.error("parameter help nelze kombinovat s žádným dalším parametrem", 1)
             return
@@ -372,7 +372,7 @@ class csv2xml:
 
         # -r=root-element
         if args.root_element != None:
-            if (self.isValidXmlTagName(args.root_element)) == False:
+            if not self.isValidXmlTagName(args.root_element):
                 self.error("nevalidní xml root element předaný parametrem -r: <"+args.root_element, 30)
 
         # -s=separator
@@ -381,23 +381,23 @@ class csv2xml:
 
         # -c=column-element
         if args.column_element != None:
-            if (self.isValidXmlTagName(args.column_element)) == False:
+            if not self.isValidXmlTagName(args.column_element):
                 self.error("nevalidní xml column element předaný parametrem -c: <"+args.column_element, 30)
 
         # -l=line-element
         if args.line_element != None:
-            if (self.isValidXmlTagName(args.line_element)) == False:
+            if not self.isValidXmlTagName(args.line_element):
                 self.error("nevalidní xml line element předaný parametrem -l: <"+args.line_element, 30)
 
         # -i
-        if args.i == True and args.line_element == None:
+        if args.i and args.line_element == None:
             self.error("-i parameter se musí kombinovat s parametrem -l", 1)
 
         # --start=n
         if args.start != None:
             if args.start < 0:
                 self.error("hodnota parametru --start=n musí být >= 0", 1)
-            if args.i == None or args.line_element == None:
+            if not args.i or args.line_element == None:
                 self.error("parameter --start se musí kombinovat s parametrem -i a -l", 1)
 
         # -e, --error-recovery
@@ -414,12 +414,12 @@ class csv2xml:
 
         # --missing-field=val
         if args.missing_field != None:
-            if args.e == None:
+            if not args.e:
                 self.error("parameter --missing-field je povolen pouze v kombinaci s --error-recovery, -e", 1);
 
         # --all-columns
-        if args.all_collumns != None:
-            if args.e == None:
+        if args.all_collumns:
+            if not args.e:
                 self.error("parameter --all-columns je povolen pouze v kombinaci s --error-recovery, -e", 1);
 
         return
@@ -446,7 +446,7 @@ class csv2xml:
             args.start = 1
 
         # -e, --error-recovery
-        if args.e == True:
+        if args.e:
             if args.missing_field == None:
                 args.missing_field = ''
 
@@ -458,28 +458,28 @@ class csv2xml:
         args = argparse.ArgumentParser(prog='python3.6 csv.py', add_help=False, description='Script na konverzi formátu CSV (viz RFC 4180) do XML. Pro správnou funkčnost je nutná verze Python3.6.')
 
         # nápověda
-        args.add_argument('--help', dest='help', action='store_true', default=False, help='nápověda')
+        args.add_argument('--help', dest='help', action='store_true', help='nápověda')
 
         # standartní argumenty
         args.add_argument('--input', dest='input', help='zadaný vstupní CSV soubor v UTF-8')
         args.add_argument('--output', dest='output', help='textový výstupní XML soubor s obsahem převedeným ze vstupního souboru')
-        args.add_argument('-n', dest='n', action='store_true', default=False, help='negenerovat XML hlavičku na výstup skriptu (vhodné například v případě kombinování více výsledků)')
-        args.add_argument('-r', dest='root_element', action='store', help='jméno párového kořenového elementu obalující výsledek')
+        args.add_argument('-n', dest='n', action='store_true', help='negenerovat XML hlavičku na výstup skriptu (vhodné například v případě kombinování více výsledků)')
+        args.add_argument('-r', dest='root_element', help='jméno párového kořenového elementu obalující výsledek')
         args.add_argument('-s', dest='separator', action='store', help='nastavení separátoru (jeden znak) buněk (resp. sloupců) na každém řádku vstupního CSV')
         args.add_argument('-h', dest='subst', action='store', nargs='?', const='-', help='první řádek (přesněji první záznam) CSV souboru slouží jako hlavička a od něj jsou odvozena jména elementů XML')
         args.add_argument('-c', dest='column_element', action='store', help='určuje prefix jména elementu column-elementX')
         args.add_argument('-l', dest='line_element', action='store', nargs='?', const='row', help='jméno elementu, který obaluje zvlášť každý řádek vstupního CSV')
-        args.add_argument('-i', dest='i', action='store_true', default=False, help='zajistí vložení atributu index s číselnou hodnotou do elementu line-element')
+        args.add_argument('-i', dest='i', action='store_true', help='zajistí vložení atributu index s číselnou hodnotou do elementu line-element')
         args.add_argument('--start', dest='start', action='store', type=int, help='inicializace inkrementálního čitače pro parametr -i na zadané kladné celé číslo n včetně nuly (implicitně n = 1)')
-        args.add_argument('-e', '--error-recovery', dest='e', action='store_true', default=False, help='zotavení z chybného počtu sloupců na neprvním řádku')
+        args.add_argument('-e', '--error-recovery', dest='e', action='store_true', help='zotavení z chybného počtu sloupců na neprvním řádku')
         args.add_argument('--missing-field', dest='missing_field', action='store', help='missing field filler')
-        args.add_argument('--all-columns', dest='all_collumns', action='store_true', default=False, help='parametr je povolen pouze v kombinaci s --error-recovery (resp. -e), sloupce, které jsou v nekorektním CSV navíc, nejsou ignorovány, ale jsou také vloženy do výsledného XML')
+        args.add_argument('--all-columns', dest='all_collumns', action='store_true', help='parametr je povolen pouze v kombinaci s --error-recovery (resp. -e), sloupce, které jsou v nekorektním CSV navíc, nejsou ignorovány, ale jsou také vloženy do výsledného XML')
 
         # rozšíření PAD
-        args.add_argument('--padding', dest='padding', action='store_true', default=False, help='Provide compact output')
+        args.add_argument('--padding', dest='padding', action='store_true', help='Provide compact output')
 
         # rozšíření VLC
-        args.add_argument('--validate', dest='validate', action='store_true', default=False, help='pokročilá validace vstupního CSV souboru vůči striktnímu výkladu RFC 4180');
+        args.add_argument('--validate', dest='validate', action='store_true', help='pokročilá validace vstupního CSV souboru vůči striktnímu výkladu RFC 4180');
 
         # parsování argumentů
         result = args.parse_args()
