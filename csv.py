@@ -349,6 +349,7 @@ class csv2xml:
         if args.help == True:
             if len(sys.argv) != 2:
                 self.error("parameter help nelze kombinovat s žádným dalším parametrem", 1)
+            return
 
         # --input=filename
         if args.input == None:
@@ -486,13 +487,13 @@ class csv2xml:
         # validování argumentů
         self.validateCmdArgs(result)
 
-        # donastavování argumentů
-        result = self.setUpCmdArgs(result)
-
         # --help
         if result.help == True:
             args.print_help()
             sys.exit(0)
+
+        # donastavování argumentů
+        result = self.setUpCmdArgs(result)
 
         return result
 
