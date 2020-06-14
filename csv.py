@@ -376,7 +376,7 @@ class csv2xml:
                 self.error("nevalidní xml root element předaný parametrem -r: <"+args.root_element, 30)
 
         # -s=separator
-        if args.separator != None and args.separator.__len__() != 1:
+        if args.separator != None and (args.separator.__len__() != 1 and args.separator != 'TAB'):
             self.error("separátor nastavovaný skrze parameter -s musí být pouze jeden znak", 1)
 
         # -c=column-element
