@@ -468,7 +468,7 @@ class csv2xml:
         args.add_argument('-s', dest='separator', action='store', help='nastavení separátoru (jeden znak) buněk (resp. sloupců) na každém řádku vstupního CSV')
         args.add_argument('-h', dest='subst', action='store', nargs='?', const='-', help='první řádek (přesněji první záznam) CSV souboru slouží jako hlavička a od něj jsou odvozena jména elementů XML')
         args.add_argument('-c', dest='column_element', action='store', help='určuje prefix jména elementu column-elementX')
-        args.add_argument('-l', dest='line_element', action='store', nargs='?', const='row', help='jméno elementu, který obaluje zvlášť každý řádek vstupního CSV')
+        args.add_argument('-l', dest='line_element', action='store', nargs='?', const='row', help='jméno elementu, který obaluje zvlášť každý řádek vstupního CSV (implicitně row)')
         args.add_argument('-i', dest='i', action='store_true', help='zajistí vložení atributu index s číselnou hodnotou do elementu line-element')
         args.add_argument('--start', dest='start', action='store', type=int, help='inicializace inkrementálního čitače pro parametr -i na zadané kladné celé číslo n včetně nuly (implicitně n = 1)')
         args.add_argument('-e', '--error-recovery', dest='e', action='store_true', help='zotavení z chybného počtu sloupců na neprvním řádku')
