@@ -409,7 +409,7 @@ class csv2xml:
 
         # --validate
         if args.validate == True:
-            if len(sys.argv) > 3 or ((len(sys.argv) < 4) and (args.input == None or args.output == None)):
+            if args.n or args.root_element != None or args.separator != None or args.subst != None or args.column_element != None or args.line_element != None or args.column_element != None or args.i or args.start != None or args.e or args.missing_field != None or args.all_collumns:
                 self.error("vstupní parametr --validate nelze kombinovat s žádným dalším parametrem kromě --input a --output", 1)
 
         # --missing-field=val
