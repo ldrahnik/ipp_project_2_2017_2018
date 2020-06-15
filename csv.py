@@ -201,7 +201,7 @@ class csv2xml:
     def validateNonEscapedBlock(self, asciiValue):
         if self.validateTextDataBlock(asciiValue) == False:
            return False
-        return
+        return True
 
     # nahradí všechny nepovolené znaky řetězcem
     def replaceDoNotAllowedChars(self, colNames, subst):
@@ -570,7 +570,7 @@ class csv2xml:
             None != re.match('^[0-9].*$', string)    or \
             None != re.match('[^\w:_\.\-]', string)  :
                 return False
-        return
+        return True
 
     # zkontroluje validnost obsahu XML elementu
     def isValidXmlTagValue(self, value):
