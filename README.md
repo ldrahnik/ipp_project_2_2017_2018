@@ -44,3 +44,15 @@ rm -rf /home/ldrahnik/projects/ipp_project_2_2016_2017/tests/csv-supplementary-t
 ```
 
 ## Odevzdané soubory:
+
+```
+make tree
+tree -a xdrahn00-CSV
+xdrahn00-CSV
+├── CSV-doc.pdf
+├── csv.py
+├── README.md
+└── rozsireni
+
+0 directories, 4 files
+```
