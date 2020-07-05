@@ -8,6 +8,51 @@ CSV: CSV2XML
 
 ## Příklad spuštění:
 
+```
+python3.6 csv.py --help
+usage: python3.6 csv.py [--help] [--input INPUT] [--output OUTPUT] [-n]
+                        [-r ROOT_ELEMENT] [-s SEPARATOR] [-h [SUBST]]
+                        [-c [COLUMN_ELEMENT]] [-l [LINE_ELEMENT]] [-i]
+                        [--start START] [-e] [--missing-field MISSING_FIELD]
+                        [--all-columns] [--padding] [--validate]
+
+Script na konverzi formátu CSV (viz RFC 4180) do XML. Pro správnou funkčnost
+je nutná verze Python3.6.
+
+optional arguments:
+  --help                nápověda
+  --input INPUT         zadaný vstupní CSV soubor v UTF-8
+  --output OUTPUT       textový výstupní XML soubor s obsahem převedeným ze
+                        vstupního souboru
+  -n                    negenerovat XML hlavičku na výstup skriptu (vhodné
+                        například v případě kombinování více výsledků)
+  -r ROOT_ELEMENT       jméno párového kořenového elementu obalující výsledek
+  -s SEPARATOR          nastavení separátoru (jeden znak) buněk (resp.
+                        sloupců) na každém řádku vstupního CSV
+  -h [SUBST]            první řádek (přesněji první záznam) CSV souboru slouží
+                        jako hlavička a od něj jsou odvozena jména elementů
+                        XML
+  -c [COLUMN_ELEMENT]   určuje prefix jména elementu column-elementX, který
+                        bude obalovat nepojmenované sloupce (implicitně col)
+  -l [LINE_ELEMENT]     jméno elementu, který obaluje zvlášť každý řádek
+                        vstupního CSV (implicitně row)
+  -i                    zajistí vložení atributu index s číselnou hodnotou do
+                        elementu line-element
+  --start START         inicializace inkrementálního čitače pro parametr -i na
+                        zadané kladné celé číslo n včetně nuly (implicitně n =
+                        1)
+  -e, --error-recovery  zotavení z chybného počtu sloupců na neprvním řádku
+  --missing-field MISSING_FIELD
+                        missing field filler
+  --all-columns         parametr je povolen pouze v kombinaci s --error-
+                        recovery (resp. -e), sloupce, které jsou v nekorektním
+                        CSV navíc, nejsou ignorovány, ale jsou také vloženy do
+                        výsledného XML
+  --padding             Provide compact output
+  --validate            pokročilá validace vstupního CSV souboru vůči
+                        striktnímu výkladu RFC 4180
+```
+
 ## Omezení programu:
 
 ## Rozšíření programu:
